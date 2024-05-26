@@ -1,38 +1,81 @@
-.App {
-  text-align: center;
+@font-face {
+  font-family: 'KharkivTone';
+  src: url('Font.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+* {
+  font-size: 20px;
+  font-family: KharkivTone, sans-serif;
 }
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
+html {
+  background: linear-gradient(to right top, #2f6159 10%, #141414 90%);
   min-height: 100vh;
+}
+body {
+  margin-left: 2em;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+h1 {
+  color: #e5e5e5;
+  font-size: xx-large;
+}
+
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+li {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  margin-bottom: 10px;
 }
 
-.App-link {
-  color: #61dafb;
-}
+input[type='text'] {
+  padding: 8px;
+  background-color: transparent;
+  color: #e5e5e5;
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+  &::placeholder {
+    transition: 500ms;
   }
-  to {
-    transform: rotate(360deg);
+  &:focus::placeholder {
+    transition: 500ms;
+    transform: scale(0.1);
+    opacity: 0;
+  }
+}
+
+.modal {
+  position: relative;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(to right top, #2f6159 10%, #141414 90%);
+  padding: 20px;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+}
+
+.create_modal {
+  margin-bottom: 0.2em;
+}
+
+.matches {
+  display: flex;
+  gap: 2em;
+  .match {
+    border: 2px solid #2f6159;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 2em;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
 }

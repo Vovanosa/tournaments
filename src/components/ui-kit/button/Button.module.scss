@@ -1,0 +1,22 @@
+button {
+  transition: 600ms;
+  white-space: nowrap;
+  height: 3em;
+  margin-left: 1em;
+  padding: 1.2em 2em 2em 2em;
+  cursor: pointer;
+  color: #e5e5e5;
+  background-color: rgba(0%, 0%, 0%, 0);
+  border: 1px solid #e5e5e5;
+  border-radius: 50px;
+  &:hover {
+    transition: 600ms;
+    background-color: #6bd8c7;
+    color: #e5e5e5;
+  }
+  &:disabled,
+  &:disabled:hover {
+    transition: 600ms;
+    background-color: #4e4e4e;
+  }
+}

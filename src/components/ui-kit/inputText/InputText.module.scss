@@ -1,0 +1,14 @@
+input[type='text'] {
+  padding: 8px;
+  background-color: transparent;
+  color: #e5e5e5;
+
+  &::placeholder {
+    transition: 500ms;
+  }
+  &:focus::placeholder {
+    transition: 500ms;
+    transform: scale(0.1);
+    opacity: 0;
+  }
+}
