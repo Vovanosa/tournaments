@@ -2,28 +2,31 @@ const cors = require('cors');
 const express = require('express');
 const bodyParser = require('body-parser');
 const fs = require('fs');
+const bcrypt = require('bcrypt');
 const path = require('path');
 
 const app = express();
 const PORT = 5000;
-const DATA_FILE = path.join(__dirname, 'data', 'tournaments.json');
+const TOURNAMENTS_FILE = path.join(__dirname, 'data', 'tournaments.json');
+const USERS_FILE = path.join(__dirname, 'data', 'users.json');
 
 app.use(cors());
 app.use(bodyParser.json({ limit: '1mb' }));
 
-const loadTournaments = () => {
-  if (fs.existsSync(DATA_FILE)) {
-    const rawData = fs.readFileSync(DATA_FILE);
+const loadData = (file) => {
+  if (fs.existsSync(file)) {
+    const rawData = fs.readFileSync(file);
     return JSON.parse(rawData);
   }
   return [];
 };
 
-const saveTournaments = (tournaments) => {
-  fs.writeFileSync(DATA_FILE, JSON.stringify(tournaments, null, 2));
+const saveData = (file, data) => {
+  fs.writeFileSync(file, JSON.stringify(data, null, 2));
 };
 
-let tournaments = loadTournaments();
+let tournaments = loadData(TOURNAMENTS_FILE);
+let users = loadData(USERS_FILE);
 
 app.get('/api/tournaments', (req, res) => {
   res.json(tournaments);
@@ -32,7 +35,7 @@ app.get('/api/tournaments', (req, res) => {
 app.post('/api/tournaments', (req, res) => {
   const newTournament = req.body;
   tournaments.push(newTournament);
-  saveTournaments(tournaments);
+  saveData(TOURNAMENTS_FILE, tournaments);
   res.status(201).json(newTournament);
 });
 
@@ -42,15 +45,26 @@ app.put('/api/tournaments/:id', (req, res) => {
   tournaments = tournaments.map((t) =>
     t.id === parseInt(id) ? updatedTournament : t
   );
-  saveTournaments(tournaments);
+  saveData(TOURNAMENTS_FILE, tournaments);
   res.json(updatedTournament);
 });
 
 app.delete('/api/tournaments/:id', (req, res) => {
   const { id } = req.params;
   tournaments = tournaments.filter((t) => t.id !== parseInt(id));
-  saveTournaments(tournaments);
+  saveData(TOURNAMENTS_FILE, tournaments);
   res.status(204).end();
+});
+
+app.get('/api/users', (req, res) => {
+  res.json(users);
+});
+
+app.post('/api/users', (req, res) => {
+  const newUser = req.body;
+  users.push(newUser);
+  saveData(USERS_FILE, users);
+  res.status(201).json(newUser);
 });
 
 app.listen(PORT, () => {

@@ -1,61 +1,31 @@
 [
   {
-    "id": 1,
-    "name": "1",
-    "matches": [
-      {
-        "id": 1,
-        "nextMatchId": null,
-        "tournamentRoundText": "1",
-        "startTime": "2024-05-26",
-        "state": "SCORE_DONE",
-        "participants": [
-          {
-            "id": 1,
-            "name": "Team 1",
-            "picture": "",
-            "resultText": "Winner",
-            "isWinner": true,
-            "status": "PLAYED"
-          },
-          {
-            "id": 2,
-            "name": "Team 2",
-            "picture": "",
-            "resultText": "Lost",
-            "isWinner": false,
-            "status": "PLAYED"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "id": 2,
-    "name": "123321",
+    "id": 1717436730029,
+    "name": "waxaxawxc ",
+    "creator": "Username",
     "matches": [
       {
         "id": 1,
         "nextMatchId": 5,
         "tournamentRoundText": "1",
-        "startTime": "2024-05-26",
-        "state": "SCORE_DONE",
+        "startTime": "2024-06-03",
+        "state": "SCHEDULED",
         "participants": [
+          {
+            "id": 4,
+            "name": "Team 4",
+            "picture": "",
+            "resultText": "",
+            "isWinner": false,
+            "status": null
+          },
           {
             "id": 5,
             "name": "Team 5",
             "picture": "",
             "resultText": "",
             "isWinner": false,
-            "status": "PLAYED"
-          },
-          {
-            "id": 1,
-            "name": "Team 1",
-            "picture": "",
-            "resultText": "",
-            "isWinner": false,
-            "status": "PLAYED"
+            "status": null
           }
         ]
       },
@@ -63,177 +33,12 @@
         "id": 2,
         "nextMatchId": 5,
         "tournamentRoundText": "1",
-        "startTime": "2024-05-26",
-        "state": "SCORE_DONE",
-        "participants": [
-          {
-            "id": 3,
-            "name": "Team 3",
-            "picture": "",
-            "resultText": "Lost",
-            "isWinner": false,
-            "status": "PLAYED"
-          },
-          {
-            "id": 6,
-            "name": "Team 6",
-            "picture": "",
-            "resultText": "Winner",
-            "isWinner": true,
-            "status": "PLAYED"
-          }
-        ]
-      },
-      {
-        "id": 3,
-        "nextMatchId": 6,
-        "tournamentRoundText": "1",
-        "startTime": "2024-05-26",
-        "state": "SCORE_DONE",
-        "participants": [
-          {
-            "id": 2,
-            "name": "Team 2",
-            "picture": "",
-            "resultText": "Winner",
-            "isWinner": true,
-            "status": "PLAYED"
-          },
-          {
-            "id": 4,
-            "name": "Team 4",
-            "picture": "",
-            "resultText": "Lost",
-            "isWinner": false,
-            "status": "PLAYED"
-          }
-        ]
-      },
-      {
-        "id": 4,
-        "nextMatchId": 6,
-        "tournamentRoundText": "1",
-        "startTime": "2024-05-26",
-        "state": "SCORE_DONE",
+        "startTime": "2024-06-03",
+        "state": "SCHEDULED",
         "participants": [
           {
             "id": 7,
             "name": "Team 7",
-            "picture": "",
-            "resultText": "Lost",
-            "isWinner": false,
-            "status": "PLAYED"
-          },
-          {
-            "id": 8,
-            "name": "Team 8",
-            "picture": "",
-            "resultText": "Winner",
-            "isWinner": true,
-            "status": "PLAYED"
-          }
-        ]
-      },
-      {
-        "id": 5,
-        "nextMatchId": 7,
-        "tournamentRoundText": "2",
-        "startTime": "2024-05-26",
-        "state": "SCHEDULED",
-        "participants": [
-          {
-            "id": 6,
-            "name": "Team 6",
-            "picture": "",
-            "resultText": "",
-            "isWinner": false,
-            "status": null
-          }
-        ]
-      },
-      {
-        "id": 6,
-        "nextMatchId": 7,
-        "tournamentRoundText": "2",
-        "startTime": "2024-05-26",
-        "state": "SCORE_DONE",
-        "participants": [
-          {
-            "id": 2,
-            "name": "Team 2",
-            "picture": "",
-            "resultText": "Winner",
-            "isWinner": true,
-            "status": "PLAYED"
-          },
-          {
-            "id": 8,
-            "name": "Team 8",
-            "picture": "",
-            "resultText": "Lost",
-            "isWinner": false,
-            "status": "PLAYED"
-          }
-        ]
-      },
-      {
-        "id": 7,
-        "nextMatchId": null,
-        "tournamentRoundText": "3",
-        "startTime": "2024-05-26",
-        "state": "SCHEDULED",
-        "participants": [
-          {
-            "id": 2,
-            "name": "Team 2",
-            "picture": "",
-            "resultText": "",
-            "isWinner": false,
-            "status": null
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "id": 3,
-    "name": "123132",
-    "matches": [
-      {
-        "id": 1,
-        "nextMatchId": 5,
-        "tournamentRoundText": "1",
-        "startTime": "2024-05-26",
-        "state": "SCHEDULED",
-        "participants": [
-          {
-            "id": 6,
-            "name": "Team 6",
-            "picture": "",
-            "resultText": "",
-            "isWinner": false,
-            "status": null
-          },
-          {
-            "id": 1,
-            "name": "Team 1",
-            "picture": "",
-            "resultText": "",
-            "isWinner": false,
-            "status": null
-          }
-        ]
-      },
-      {
-        "id": 2,
-        "nextMatchId": 5,
-        "tournamentRoundText": "1",
-        "startTime": "2024-05-26",
-        "state": "SCHEDULED",
-        "participants": [
-          {
-            "id": 2,
-            "name": "Team 2",
             "picture": "",
             "resultText": "",
             "isWinner": false,
@@ -253,20 +58,20 @@
         "id": 3,
         "nextMatchId": 6,
         "tournamentRoundText": "1",
-        "startTime": "2024-05-26",
+        "startTime": "2024-06-03",
         "state": "SCHEDULED",
         "participants": [
           {
-            "id": 7,
-            "name": "Team 7",
+            "id": 1,
+            "name": "Team 1",
             "picture": "",
             "resultText": "",
             "isWinner": false,
             "status": null
           },
           {
-            "id": 5,
-            "name": "Team 5",
+            "id": 8,
+            "name": "Team 8",
             "picture": "",
             "resultText": "",
             "isWinner": false,
@@ -278,12 +83,207 @@
         "id": 4,
         "nextMatchId": 6,
         "tournamentRoundText": "1",
-        "startTime": "2024-05-26",
+        "startTime": "2024-06-03",
         "state": "SCHEDULED",
         "participants": [
           {
-            "id": 8,
-            "name": "Team 8",
+            "id": 6,
+            "name": "Team 6",
+            "picture": "",
+            "resultText": "",
+            "isWinner": false,
+            "status": null
+          },
+          {
+            "id": 2,
+            "name": "Team 2",
+            "picture": "",
+            "resultText": "",
+            "isWinner": false,
+            "status": null
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "nextMatchId": 7,
+        "tournamentRoundText": "2",
+        "startTime": "2024-06-03",
+        "state": "SCHEDULED",
+        "participants": []
+      },
+      {
+        "id": 6,
+        "nextMatchId": 7,
+        "tournamentRoundText": "2",
+        "startTime": "2024-06-03",
+        "state": "SCHEDULED",
+        "participants": []
+      },
+      {
+        "id": 7,
+        "nextMatchId": null,
+        "tournamentRoundText": "3",
+        "startTime": "2024-06-03",
+        "state": "SCHEDULED",
+        "participants": []
+      }
+    ]
+  },
+  {
+    "id": 1717436742772,
+    "name": "awd asfcesw ",
+    "creator": "nigger",
+    "matches": [
+      {
+        "id": 1,
+        "nextMatchId": null,
+        "tournamentRoundText": "1",
+        "startTime": "2024-06-03",
+        "state": "SCHEDULED",
+        "participants": [
+          {
+            "id": 1,
+            "name": "Team 1",
+            "picture": "",
+            "resultText": "",
+            "isWinner": false,
+            "status": null
+          },
+          {
+            "id": 2,
+            "name": "Team 2",
+            "picture": "",
+            "resultText": "",
+            "isWinner": false,
+            "status": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 1717437004668,
+    "name": "awdca",
+    "creator": "awdasd",
+    "matches": [
+      {
+        "id": 1,
+        "nextMatchId": 3,
+        "tournamentRoundText": "1",
+        "startTime": "2024-06-03",
+        "state": "SCORE_DONE",
+        "participants": [
+          {
+            "id": 4,
+            "name": "Team 4",
+            "picture": "",
+            "resultText": "Winner",
+            "isWinner": true,
+            "status": "PLAYED"
+          },
+          {
+            "id": 1,
+            "name": "Team 1",
+            "picture": "",
+            "resultText": "Lost",
+            "isWinner": false,
+            "status": "PLAYED"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "nextMatchId": 3,
+        "tournamentRoundText": "1",
+        "startTime": "2024-06-03",
+        "state": "SCORE_DONE",
+        "participants": [
+          {
+            "id": 3,
+            "name": "Team 3",
+            "picture": "",
+            "resultText": "Lost",
+            "isWinner": false,
+            "status": "PLAYED"
+          },
+          {
+            "id": 2,
+            "name": "Team 2",
+            "picture": "",
+            "resultText": "Winner",
+            "isWinner": true,
+            "status": "PLAYED"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "nextMatchId": null,
+        "tournamentRoundText": "2",
+        "startTime": "2024-06-03",
+        "state": "SCORE_DONE",
+        "participants": [
+          {
+            "id": 4,
+            "name": "Team 4",
+            "picture": "",
+            "resultText": "Winner",
+            "isWinner": true,
+            "status": "PLAYED"
+          },
+          {
+            "id": 2,
+            "name": "Team 2",
+            "picture": "",
+            "resultText": "Lost",
+            "isWinner": false,
+            "status": "PLAYED"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 1717438333302,
+    "name": "qwadawdaw fda",
+    "creator": "useeeeeeeeeeeeeee",
+    "matches": [
+      {
+        "id": 1,
+        "nextMatchId": 3,
+        "tournamentRoundText": "1",
+        "startTime": "2024-06-03",
+        "state": "SCHEDULED",
+        "participants": [
+          {
+            "id": 1,
+            "name": "Team 1",
+            "picture": "",
+            "resultText": "",
+            "isWinner": false,
+            "status": null
+          },
+          {
+            "id": 2,
+            "name": "Team 2",
+            "picture": "",
+            "resultText": "",
+            "isWinner": false,
+            "status": null
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "nextMatchId": 3,
+        "tournamentRoundText": "1",
+        "startTime": "2024-06-03",
+        "state": "SCHEDULED",
+        "participants": [
+          {
+            "id": 3,
+            "name": "Team 3",
             "picture": "",
             "resultText": "",
             "isWinner": false,
@@ -300,26 +300,10 @@
         ]
       },
       {
-        "id": 5,
-        "nextMatchId": 7,
-        "tournamentRoundText": "2",
-        "startTime": "2024-05-26",
-        "state": "SCHEDULED",
-        "participants": []
-      },
-      {
-        "id": 6,
-        "nextMatchId": 7,
-        "tournamentRoundText": "2",
-        "startTime": "2024-05-26",
-        "state": "SCHEDULED",
-        "participants": []
-      },
-      {
-        "id": 7,
+        "id": 3,
         "nextMatchId": null,
-        "tournamentRoundText": "3",
-        "startTime": "2024-05-26",
+        "tournamentRoundText": "2",
+        "startTime": "2024-06-03",
         "state": "SCHEDULED",
         "participants": []
       }

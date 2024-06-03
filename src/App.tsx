@@ -35,13 +35,23 @@ type TournamentMatch = {
 type Tournament = {
   id: number;
   name: string;
+  creator: string;
   matches: TournamentMatch[];
+};
+
+type User = {
+  id: number;
+  name: string;
+  role: string;
+  password: string;
 };
 
 const App = () => {
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [updateModalIsOpen, setUpdateModalIsOpen] = useState(false);
   const [openModalIsOpen, setOpenModalIsOpen] = useState(false);
+  const [userModalIsOpen, setUserModalIsOpen] = useState(false);
+  const [createUserModalIsOpen, setCreateUserModalIsOpen] = useState(false);
   const [numTeams, setNumTeams] = useState(2);
   const [teamNames, setTeamNames] = useState<string[]>([]);
   const [randomizeTeams, setRandomizeTeams] = useState(false);
@@ -50,23 +60,25 @@ const App = () => {
   const [currentTournament, setCurrentTournament] = useState<Tournament | null>(
     null
   );
+  const [users, setUsers] = useState<User[]>([]);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [newUserName, setNewUserName] = useState('');
+  const [newUserRole, setNewUserRole] = useState('guest');
+  const [newUserPassword, setNewUserPassword] = useState('');
+  const [loginUsername, setLoginUsername] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
 
   useEffect(() => {
     axios
       .get('/api/tournaments')
       .then((response) => setTournaments(response.data))
       .catch((error) => console.error('Error fetching tournaments:', error));
-  }, []);
 
-  const toggleModal = () => {
-    if (!modalIsOpen) {
-      setNumTeams(2);
-      setTeamNames([]);
-      setRandomizeTeams(false);
-      setTournamentName('');
-    }
-    setModalIsOpen(!modalIsOpen);
-  };
+    axios
+      .get('/api/users')
+      .then((response) => setUsers(response.data))
+      .catch((error) => console.error('Error fetching users:', error));
+  }, []);
 
   const toggleUpdateModal = () => {
     setUpdateModalIsOpen(!updateModalIsOpen);
@@ -74,23 +86,6 @@ const App = () => {
 
   const toggleOpenModal = () => {
     setOpenModalIsOpen(!openModalIsOpen);
-  };
-
-  const handleTeamNameChange = (index: number, value: string) => {
-    const newTeamNames = [...teamNames];
-    newTeamNames[index] = value;
-    setTeamNames(newTeamNames);
-  };
-
-  const handleRandomizeChange = () => {
-    setRandomizeTeams(!randomizeTeams);
-  };
-
-  const handleNumTeamsChange = (value: string) => {
-    setNumTeams(parseInt(value));
-    setTeamNames(
-      Array.from({ length: parseInt(value) }, (_, index) => `Team ${index + 1}`)
-    );
   };
 
   const generateMatches = (
@@ -158,11 +153,54 @@ const App = () => {
     return matches;
   };
 
+  const toggleModal = () => {
+    toggleOpenModal();
+    if (!modalIsOpen) {
+      setNumTeams(2);
+      setTeamNames([]);
+      setRandomizeTeams(false);
+      setTournamentName('');
+    }
+    setModalIsOpen(!modalIsOpen);
+  };
+
+  const toggleUserModal = () => {
+    setUserModalIsOpen(!userModalIsOpen);
+    setLoginUsername('');
+    setLoginPassword('');
+  };
+
+  const toggleCreateUserModal = () => {
+    setCreateUserModalIsOpen(!createUserModalIsOpen);
+    setNewUserName('');
+    setNewUserRole('guest');
+    setNewUserPassword('');
+  };
+
+  const handleTeamNameChange = (index: number, value: string) => {
+    const newTeamNames = [...teamNames];
+    newTeamNames[index] = value;
+    setTeamNames(newTeamNames);
+  };
+
+  const handleRandomizeChange = () => {
+    setRandomizeTeams(!randomizeTeams);
+  };
+
+  const handleNumTeamsChange = (value: string) => {
+    setNumTeams(parseInt(value));
+    setTeamNames(
+      Array.from({ length: parseInt(value) }, (_, index) => `Team ${index + 1}`)
+    );
+  };
+
   const handleCreateTournament = () => {
+    if (!currentUser) return;
     const newMatches = generateMatches(teamNames, randomizeTeams);
     const newTournament = {
-      id: tournaments.length + 1,
+      id: Date.now(),
       name: tournamentName,
+      creator: currentUser.name,
       matches: newMatches,
     };
     axios
@@ -360,31 +398,78 @@ const App = () => {
     toggleOpenModal();
   };
 
+  const handleUserSelection = (user: User) => {
+    setUserModalIsOpen(false);
+  };
+
+  const handleCreateUser = () => {
+    const newUser = {
+      id: Date.now(),
+      name: newUserName,
+      password: newUserPassword,
+      role: newUserRole,
+    };
+    axios
+      .post('/api/users', newUser)
+      .then((response) => {
+        setUsers([...users, response.data]);
+        setCurrentUser(response.data);
+        setNewUserName('');
+        setNewUserRole('guest');
+        toggleCreateUserModal();
+      })
+      .catch((error) => console.error('Error creating user:', error));
+  };
+
+  const handleLogin = () => {
+    const user = users.find(
+      (u) => u.name === loginUsername && u.password === loginPassword
+    );
+    if (user) {
+      setCurrentUser(user);
+      setUserModalIsOpen(false);
+    } else {
+      alert('Invalid username or password');
+    }
+  };
+
   return (
     <>
       <header>
         <h1>Турнірна таблиця</h1>
       </header>
+      {currentUser ? <h2>Welcome, {currentUser.name}</h2> : ''}
       <Button
-        buttonText='Create Tournament'
-        handleClick={toggleModal}
-        disabled={false}
+        handleClick={toggleUserModal}
+        buttonText={currentUser ? 'Change User' : 'Select user'}
       />
       <Button
         buttonText='Open Tournament'
         handleClick={toggleOpenModal}
-        disabled={tournaments.length === 0}
+        disabled={false}
       />
-      <Button
-        buttonText='Update'
-        handleClick={toggleUpdateModal}
-        disabled={!currentTournament}
-      />
-      <Button
-        buttonText='Delete Tournament'
-        handleClick={handleDeleteTournament}
-        disabled={!currentTournament}
-      />
+
+      {currentTournament && (
+        <>
+          <Button
+            buttonText='Update'
+            handleClick={toggleUpdateModal}
+            disabled={
+              currentUser?.role !== 'admin' &&
+              currentUser?.name !== currentTournament.creator
+            }
+          />
+          <Button
+            buttonText='Delete Tournament'
+            handleClick={handleDeleteTournament}
+            disabled={
+              currentUser?.role !== 'admin' &&
+              currentUser?.name !== currentTournament.creator
+            }
+          />
+        </>
+      )}
+
       <Modal isOpen={modalIsOpen} onRequestClose={toggleModal}>
         <h2>Select Number of Teams</h2>
         <InputText
@@ -405,7 +490,7 @@ const App = () => {
         <Button
           buttonText='Create Tournament'
           handleClick={handleCreateTournament}
-          disabled={!Boolean(teamNames.length)}
+          disabled={!Boolean(teamNames.length) || !currentUser}
         />
         <Button
           buttonText='Cancel'
@@ -439,6 +524,11 @@ const App = () => {
             handleClick={() => handleOpenTournament(tournament)}
           />
         ))}
+        <Button
+          buttonText='Create Tournament'
+          handleClick={toggleModal}
+          disabled={false}
+        />
         <Button buttonText='Cancel' handleClick={toggleOpenModal} />
       </Modal>
 
@@ -531,6 +621,63 @@ const App = () => {
           </div>
         </Modal>
       )}
+      <Modal isOpen={userModalIsOpen} onRequestClose={toggleUserModal}>
+        <h2>Log In</h2>
+        <InputText
+          id={'loginUsername'}
+          name={'loginUsername'}
+          value={loginUsername}
+          onChange={(e) => setLoginUsername(e.target.value)}
+          inputText={'Username'}
+        />
+        <InputText
+          id={'loginPassword'}
+          name={'loginPassword'}
+          value={loginPassword}
+          onChange={(e) => setLoginPassword(e.target.value)}
+          inputText={'Password'}
+        />
+        <Button handleClick={handleLogin} buttonText='Log In' />
+        <Button handleClick={toggleCreateUserModal} buttonText='Create user' />
+        <Button handleClick={toggleUserModal} buttonText='Cancel' />
+      </Modal>
+
+      <Modal
+        isOpen={createUserModalIsOpen}
+        onRequestClose={toggleCreateUserModal}
+      >
+        <h2>Create User</h2>
+        <label>
+          <InputText
+            id='newUserName'
+            name='NewUserName'
+            value={newUserName}
+            onChange={(e) => setNewUserName(e.target.value)}
+            inputText={'Username'}
+          />
+          <InputText
+            id='newUserPasswod'
+            name='NewUserPasswod'
+            value={newUserPassword}
+            onChange={(e) => setNewUserPassword(e.target.value)}
+            inputText={'Password'}
+          />
+        </label>
+        <label>
+          Role:
+          <Selector
+            defaultOption='Select role'
+            options={['admin', 'user', 'guest']}
+            setSelectedValue={setNewUserRole}
+          />
+        </label>
+        <Button
+          disabled={!newUserName}
+          handleClick={handleCreateUser}
+          buttonText='Create user'
+        />
+        <Button handleClick={toggleCreateUserModal} buttonText='Cancel' />
+      </Modal>
 
       {currentTournament && (
         <SingleEliminationBracket
