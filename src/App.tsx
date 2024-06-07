@@ -13,6 +13,7 @@ import {
 
 Modal.setAppElement('#root');
 axios.defaults.baseURL = 'http://localhost:5000';
+const bcrypt = require('bcryptjs');
 
 type Participant = {
   id: number;
@@ -36,6 +37,7 @@ type Tournament = {
   id: number;
   name: string;
   creator: string;
+  privacy: string;
   matches: TournamentMatch[];
 };
 
@@ -63,11 +65,10 @@ const App = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [newUserName, setNewUserName] = useState('');
-  const [newUserRole, setNewUserRole] = useState('guest');
   const [newUserPassword, setNewUserPassword] = useState('');
   const [loginUsername, setLoginUsername] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
-
+  const [isPrivate, setIsPrivate] = useState('private');
   useEffect(() => {
     axios
       .get('/api/tournaments')
@@ -173,7 +174,6 @@ const App = () => {
   const toggleCreateUserModal = () => {
     setCreateUserModalIsOpen(!createUserModalIsOpen);
     setNewUserName('');
-    setNewUserRole('guest');
     setNewUserPassword('');
   };
 
@@ -201,6 +201,7 @@ const App = () => {
       id: Date.now(),
       name: tournamentName,
       creator: currentUser.name,
+      privacy: isPrivate,
       matches: newMatches,
     };
     axios
@@ -394,42 +395,61 @@ const App = () => {
   };
 
   const handleOpenTournament = (tournament: Tournament) => {
+    let filteredTournaments: Tournament[] = [];
+
+    if (currentUser) {
+      if (currentUser.role === 'admin') {
+        filteredTournaments = tournaments;
+      } else if (currentUser.role === 'user') {
+        filteredTournaments = tournaments.filter(
+          (t) => t.privacy === 'public' || t.creator === currentUser.name
+        );
+      } else if (currentUser.role === 'guest') {
+        filteredTournaments = tournaments.filter((t) => t.privacy === 'public');
+      }
+    }
+
+    setTournaments(filteredTournaments);
     setCurrentTournament(tournament);
     toggleOpenModal();
   };
 
-  const handleUserSelection = (user: User) => {
-    setUserModalIsOpen(false);
+  const handleCreateUser = async () => {
+    try {
+      const hashedPassword = await bcrypt.hash(newUserPassword, 10);
+      const newUser = {
+        id: Date.now(),
+        name: newUserName,
+        password: hashedPassword,
+        role: 'user',
+      };
+      const response = await axios.post('/api/users', newUser);
+      setUsers([...users, response.data]);
+      setCurrentUser(response.data);
+      setNewUserName('');
+      toggleCreateUserModal();
+    } catch (error) {
+      console.error('Error creating user:', error);
+    }
   };
 
-  const handleCreateUser = () => {
-    const newUser = {
-      id: Date.now(),
-      name: newUserName,
-      password: newUserPassword,
-      role: newUserRole,
-    };
-    axios
-      .post('/api/users', newUser)
-      .then((response) => {
-        setUsers([...users, response.data]);
-        setCurrentUser(response.data);
-        setNewUserName('');
-        setNewUserRole('guest');
-        toggleCreateUserModal();
-      })
-      .catch((error) => console.error('Error creating user:', error));
-  };
-
-  const handleLogin = () => {
-    const user = users.find(
-      (u) => u.name === loginUsername && u.password === loginPassword
-    );
-    if (user) {
-      setCurrentUser(user);
-      setUserModalIsOpen(false);
-    } else {
-      alert('Invalid username or password');
+  const handleLogin = async () => {
+    try {
+      const user = users.find((u) => u.name === loginUsername);
+      if (user) {
+        const isMatch = await bcrypt.compare(loginPassword, user.password);
+        if (isMatch) {
+          setCurrentUser(user);
+          setUserModalIsOpen(false);
+          setCurrentTournament(null);
+        } else {
+          alert('Invalid username or password');
+        }
+      } else {
+        alert('Invalid username or password');
+      }
+    } catch (error) {
+      console.error('Error logging in:', error);
     }
   };
 
@@ -437,12 +457,15 @@ const App = () => {
     <>
       <header>
         <h1>Турнірна таблиця</h1>
+        <section className='right-content'>
+          {currentUser ? <h2>Welcome, {currentUser.name}</h2> : ''}
+          <Button
+            handleClick={toggleUserModal}
+            buttonText={currentUser ? 'Change User' : 'Sign In'}
+          />
+        </section>
       </header>
-      {currentUser ? <h2>Welcome, {currentUser.name}</h2> : ''}
-      <Button
-        handleClick={toggleUserModal}
-        buttonText={currentUser ? 'Change User' : 'Select user'}
-      />
+
       <Button
         buttonText='Open Tournament'
         handleClick={toggleOpenModal}
@@ -470,7 +493,11 @@ const App = () => {
         </>
       )}
 
-      <Modal isOpen={modalIsOpen} onRequestClose={toggleModal}>
+      <Modal
+        className={'modal'}
+        isOpen={modalIsOpen}
+        onRequestClose={toggleModal}
+      >
         <h2>Select Number of Teams</h2>
         <InputText
           id='tournamentName'
@@ -487,6 +514,15 @@ const App = () => {
         <Checkbox isChecked={randomizeTeams} onChange={handleRandomizeChange}>
           Randomize Teams
         </Checkbox>
+        <Checkbox
+          isChecked={isPrivate === 'public'}
+          onChange={() => {
+            setIsPrivate(isPrivate === 'public' ? 'private' : 'public');
+          }}
+        >
+          Public match
+        </Checkbox>
+        <br />
         <Button
           buttonText='Create Tournament'
           handleClick={handleCreateTournament}
@@ -514,26 +550,58 @@ const App = () => {
         ))}
       </Modal>
 
-      <Modal isOpen={openModalIsOpen} onRequestClose={toggleOpenModal}>
+      <Modal
+        className={'modal'}
+        isOpen={openModalIsOpen}
+        onRequestClose={toggleOpenModal}
+      >
         <h2>Select Tournament</h2>
-        {tournaments.map((tournament) => (
-          <Button
-            disabled={currentTournament?.id === tournament.id}
-            key={tournament.id}
-            buttonText={`Tournament ${tournament.name}`}
-            handleClick={() => handleOpenTournament(tournament)}
-          />
-        ))}
+        {currentUser && currentUser.role !== 'guest' && (
+          <>
+            <h3>My matches</h3>
+            {tournaments
+              .filter((tournament) => tournament.creator === currentUser.name)
+              .map((tournament) => (
+                <Button
+                  disabled={currentTournament?.id === tournament.id}
+                  key={tournament.id}
+                  buttonText={`Tournament ${tournament.name}`}
+                  handleClick={() => handleOpenTournament(tournament)}
+                />
+              ))}
+            <h3>All matches</h3>
+          </>
+        )}
+
+        {tournaments
+          .filter((tournament) =>
+            currentUser?.role !== 'admin'
+              ? tournament.creator !== currentUser?.name &&
+                tournament.privacy === 'public'
+              : tournament.creator !== currentUser?.name
+          )
+          .map((tournament) => (
+            <Button
+              disabled={currentTournament?.id === tournament.id}
+              key={tournament.id}
+              buttonText={`Tournament ${tournament.name}`}
+              handleClick={() => handleOpenTournament(tournament)}
+            />
+          ))}
         <Button
           buttonText='Create Tournament'
           handleClick={toggleModal}
-          disabled={false}
+          disabled={currentUser?.role === 'guest' || !currentUser}
         />
         <Button buttonText='Cancel' handleClick={toggleOpenModal} />
       </Modal>
 
       {currentTournament && (
-        <Modal isOpen={updateModalIsOpen} onRequestClose={toggleUpdateModal}>
+        <Modal
+          className={'modal'}
+          isOpen={updateModalIsOpen}
+          onRequestClose={toggleUpdateModal}
+        >
           <Button buttonText='Apply Changes' handleClick={handleApplyChanges} />
           <Button buttonText='Exit' handleClick={toggleUpdateModal} />
           <h2>Update Matches</h2>
@@ -580,7 +648,7 @@ const App = () => {
                                       e.target.value
                                     )
                                   }
-                                  disabled={!participant.name}
+                                  disabled
                                   inputText={''}
                                 />
                                 <Checkbox
@@ -621,7 +689,11 @@ const App = () => {
           </div>
         </Modal>
       )}
-      <Modal isOpen={userModalIsOpen} onRequestClose={toggleUserModal}>
+      <Modal
+        className={'modal signin'}
+        isOpen={userModalIsOpen}
+        onRequestClose={toggleUserModal}
+      >
         <h2>Log In</h2>
         <InputText
           id={'loginUsername'}
@@ -630,19 +702,26 @@ const App = () => {
           onChange={(e) => setLoginUsername(e.target.value)}
           inputText={'Username'}
         />
+        <br />
         <InputText
           id={'loginPassword'}
           name={'loginPassword'}
           value={loginPassword}
           onChange={(e) => setLoginPassword(e.target.value)}
           inputText={'Password'}
+          password={true}
         />
-        <Button handleClick={handleLogin} buttonText='Log In' />
-        <Button handleClick={toggleCreateUserModal} buttonText='Create user' />
+        <br />
+        <div className='loginsignup'>
+          <Button handleClick={handleLogin} buttonText='Log In' />
+          <Button handleClick={toggleCreateUserModal} buttonText='Sign Up' />
+        </div>
+
         <Button handleClick={toggleUserModal} buttonText='Cancel' />
       </Modal>
 
       <Modal
+        className={'modal signin'}
         isOpen={createUserModalIsOpen}
         onRequestClose={toggleCreateUserModal}
       >
@@ -661,29 +740,28 @@ const App = () => {
             value={newUserPassword}
             onChange={(e) => setNewUserPassword(e.target.value)}
             inputText={'Password'}
+            password={true}
           />
         </label>
-        <label>
-          Role:
-          <Selector
-            defaultOption='Select role'
-            options={['admin', 'user', 'guest']}
-            setSelectedValue={setNewUserRole}
+        <div className='loginsignup'>
+          <Button
+            disabled={!newUserName}
+            handleClick={handleCreateUser}
+            buttonText='Create user'
           />
-        </label>
-        <Button
-          disabled={!newUserName}
-          handleClick={handleCreateUser}
-          buttonText='Create user'
-        />
-        <Button handleClick={toggleCreateUserModal} buttonText='Cancel' />
+          <Button handleClick={toggleCreateUserModal} buttonText='Cancel' />
+        </div>
       </Modal>
 
       {currentTournament && (
-        <SingleEliminationBracket
-          matches={currentTournament.matches}
-          matchComponent={Match}
-        />
+        <>
+          <br />
+          Current tournament: {currentTournament.name}
+          <SingleEliminationBracket
+            matches={currentTournament.matches}
+            matchComponent={Match}
+          />
+        </>
       )}
     </>
   );

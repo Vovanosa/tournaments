@@ -8,6 +8,7 @@
 * {
   font-size: 20px;
   font-family: KharkivTone, sans-serif;
+  color: #e5e5e5;
 }
 html {
   background: linear-gradient(to right top, #2f6159 10%, #141414 90%);
@@ -18,8 +19,14 @@ body {
 }
 
 header {
-  text-align: center;
-  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  .right-content {
+    display: flex;
+    align-items: center;
+  }
 }
 
 h1 {
@@ -38,6 +45,10 @@ li {
   margin-bottom: 10px;
 }
 
+input[type='date'] {
+  background-color: transparent;
+}
+
 input[type='text'] {
   padding: 8px;
   background-color: transparent;
@@ -52,16 +63,34 @@ input[type='text'] {
     opacity: 0;
   }
 }
-
+.ReactModal__Overlay {
+  background-color: #092722 !important;
+  justify-content: center !important;
+  display: flex !important;
+}
 .modal {
   position: relative;
-  transform: translate(-50%, -50%);
+  border: 1px solid rgb(204, 204, 204);
   background: linear-gradient(to right top, #2f6159 10%, #141414 90%);
+  margin: 5em;
+  overflow: auto;
+  border-radius: 4px;
+  outline: none;
   padding: 20px;
-  border-radius: 20px;
-  display: flex;
-  flex-direction: row;
-  width: 100%;
+  &.signin {
+    align-self: center;
+    height: 18em;
+    width: 23em;
+  }
+}
+
+.checkboxesoptions {
+  display: block;
+  content: '';
+}
+
+.loginsignup {
+  text-wrap: nowrap;
 }
 
 .create_modal {

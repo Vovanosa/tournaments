@@ -10,6 +10,7 @@ interface InputTextProps {
   onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void;
   disabled?: boolean;
   name?: string;
+  password?: boolean;
 }
 
 const InputText: FunctionComponent<InputTextProps> = (props) => {
@@ -22,6 +23,7 @@ const InputText: FunctionComponent<InputTextProps> = (props) => {
     onKeyDown,
     disabled,
     name,
+    password,
   } = props;
 
   return (
@@ -29,7 +31,7 @@ const InputText: FunctionComponent<InputTextProps> = (props) => {
       disabled={disabled}
       autoFocus={autoFocus}
       style={styles}
-      type='text'
+      type={password ? 'password' : 'text'}
       id={id}
       placeholder={inputText}
       value={value}
