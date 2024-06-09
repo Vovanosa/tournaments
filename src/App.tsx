@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import './App.css';
 import Button from './components/ui-kit/button';
@@ -196,22 +196,28 @@ const App = () => {
 
   const handleCreateTournament = () => {
     if (!currentUser) return;
-    const newMatches = generateMatches(teamNames, randomizeTeams);
-    const newTournament = {
-      id: Date.now(),
-      name: tournamentName,
-      creator: currentUser.name,
-      privacy: isPrivate,
-      matches: newMatches,
-    };
-    axios
-      .post('/api/tournaments', newTournament)
-      .then((response) => {
-        setTournaments([...tournaments, response.data]);
-        setCurrentTournament(response.data);
-        toggleModal();
-      })
-      .catch((error) => console.error('Error creating tournament:', error));
+    if (!tournaments.some((tournament) => tournament.name === tournamentName)) {
+      const newMatches = generateMatches(teamNames, randomizeTeams);
+      const newTournament = {
+        id: Date.now(),
+        name: tournamentName,
+        creator: currentUser.name,
+        privacy: isPrivate,
+        matches: newMatches,
+      };
+      axios
+        .post('/api/tournaments', newTournament)
+        .then((response) => {
+          setTournaments([...tournaments, response.data]);
+          setCurrentTournament(response.data);
+          toggleModal();
+          setIsPrivate('private');
+        })
+        .catch((error) => console.error('Error creating tournament:', error));
+    } else {
+      alert('Tournament with that name already exists');
+      setTournamentName('');
+    }
   };
 
   const handleDeleteTournament = () => {
@@ -415,21 +421,29 @@ const App = () => {
   };
 
   const handleCreateUser = async () => {
-    try {
-      const hashedPassword = await bcrypt.hash(newUserPassword, 10);
-      const newUser = {
-        id: Date.now(),
-        name: newUserName,
-        password: hashedPassword,
-        role: 'user',
-      };
-      const response = await axios.post('/api/users', newUser);
-      setUsers([...users, response.data]);
-      setCurrentUser(response.data);
+    if (users.some((user) => user.name === newUserName)) {
+      alert('User with that nickname already exists');
       setNewUserName('');
-      toggleCreateUserModal();
-    } catch (error) {
-      console.error('Error creating user:', error);
+      setNewUserPassword('');
+    } else {
+      try {
+        const hashedPassword = await bcrypt.hash(newUserPassword, 10);
+
+        const newUser = {
+          id: Date.now(),
+          name: newUserName,
+          password: hashedPassword,
+          role: 'user',
+        };
+        const response = await axios.post('/api/users', newUser);
+        setUsers([...users, response.data]);
+        setCurrentUser(response.data);
+        setNewUserName('');
+        setNewUserPassword('');
+        toggleCreateUserModal();
+      } catch (error) {
+        console.error('Error creating user:', error);
+      }
     }
   };
 
@@ -456,7 +470,15 @@ const App = () => {
   return (
     <>
       <header>
-        <h1>Турнірна таблиця</h1>
+        <section className='left-content'>
+          <h1>Tournament table </h1>
+          <Button
+            buttonText='Open Tournament'
+            handleClick={toggleOpenModal}
+            disabled={false}
+          />
+        </section>
+
         <section className='right-content'>
           {currentUser ? <h2>Welcome, {currentUser.name}</h2> : ''}
           <Button
@@ -465,12 +487,6 @@ const App = () => {
           />
         </section>
       </header>
-
-      <Button
-        buttonText='Open Tournament'
-        handleClick={toggleOpenModal}
-        disabled={false}
-      />
 
       {currentTournament && (
         <>
@@ -534,7 +550,7 @@ const App = () => {
           disabled={false}
         />
         {teamNames.map((teamName, index) => (
-          <div className='create_modal' key={index}>
+          <section className='create_modal' key={index}>
             <label htmlFor={`teamName${index}`}>{`Team ${
               index + 1
             } name:`}</label>
@@ -546,7 +562,7 @@ const App = () => {
               onChange={(e) => handleTeamNameChange(index, e.target.value)}
               inputText={''}
             />
-          </div>
+          </section>
         ))}
       </Modal>
 
@@ -559,16 +575,22 @@ const App = () => {
         {currentUser && currentUser.role !== 'guest' && (
           <>
             <h3>My matches</h3>
-            {tournaments
-              .filter((tournament) => tournament.creator === currentUser.name)
-              .map((tournament) => (
-                <Button
-                  disabled={currentTournament?.id === tournament.id}
-                  key={tournament.id}
-                  buttonText={`Tournament ${tournament.name}`}
-                  handleClick={() => handleOpenTournament(tournament)}
-                />
-              ))}
+            {tournaments.filter(
+              (tournament) => tournament.creator === currentUser.name
+            ).length === 0
+              ? 'No matches'
+              : tournaments
+                  .filter(
+                    (tournament) => tournament.creator === currentUser.name
+                  )
+                  .map((tournament) => (
+                    <Button
+                      disabled={currentTournament?.id === tournament.id}
+                      key={tournament.id}
+                      buttonText={`Tournament ${tournament.name}`}
+                      handleClick={() => handleOpenTournament(tournament)}
+                    />
+                  ))}
             <h3>All matches</h3>
           </>
         )}
@@ -588,12 +610,14 @@ const App = () => {
               handleClick={() => handleOpenTournament(tournament)}
             />
           ))}
-        <Button
-          buttonText='Create Tournament'
-          handleClick={toggleModal}
-          disabled={currentUser?.role === 'guest' || !currentUser}
-        />
-        <Button buttonText='Cancel' handleClick={toggleOpenModal} />
+        <section className='loginsignup'>
+          <Button
+            buttonText='Create Tournament'
+            handleClick={toggleModal}
+            disabled={currentUser?.role === 'guest' || !currentUser}
+          />
+          <Button buttonText='Cancel' handleClick={toggleOpenModal} />
+        </section>
       </Modal>
 
       {currentTournament && (
@@ -605,7 +629,7 @@ const App = () => {
           <Button buttonText='Apply Changes' handleClick={handleApplyChanges} />
           <Button buttonText='Exit' handleClick={toggleUpdateModal} />
           <h2>Update Matches</h2>
-          <div className='matches'>
+          <section className='matches'>
             {currentTournament &&
               Array.from(
                 new Set(
@@ -616,7 +640,7 @@ const App = () => {
               )
                 .sort((a, b) => a - b)
                 .map((roundIndex) => (
-                  <div key={roundIndex}>
+                  <section key={roundIndex}>
                     {currentTournament.matches
                       .filter(
                         (match) =>
@@ -631,10 +655,10 @@ const App = () => {
                             ))
                       )
                       .map((match, matchIndex) => (
-                        <div className='match' key={match.id}>
+                        <section className='match' key={match.id}>
                           {match.participants.map(
                             (participant, participantIndex) => (
-                              <div key={participant.id}>
+                              <section key={participant.id}>
                                 <InputText
                                   autoFocus={false}
                                   id={`participantName${participant.id}`}
@@ -663,7 +687,7 @@ const App = () => {
                                 >
                                   Winner
                                 </Checkbox>
-                              </div>
+                              </section>
                             )
                           )}
                           <label htmlFor={`matchDate${match.id}`}>
@@ -682,11 +706,11 @@ const App = () => {
                               handleDateChange(match.id, e.target.value)
                             }
                           />
-                        </div>
+                        </section>
                       ))}
-                  </div>
+                  </section>
                 ))}
-          </div>
+          </section>
         </Modal>
       )}
       <Modal
@@ -712,10 +736,10 @@ const App = () => {
           password={true}
         />
         <br />
-        <div className='loginsignup'>
+        <section className='loginsignup'>
           <Button handleClick={handleLogin} buttonText='Log In' />
           <Button handleClick={toggleCreateUserModal} buttonText='Sign Up' />
-        </div>
+        </section>
 
         <Button handleClick={toggleUserModal} buttonText='Cancel' />
       </Modal>
@@ -739,18 +763,18 @@ const App = () => {
             name='NewUserPasswod'
             value={newUserPassword}
             onChange={(e) => setNewUserPassword(e.target.value)}
-            inputText={'Password'}
+            inputText={'Password (>8 characters)'}
             password={true}
           />
         </label>
-        <div className='loginsignup'>
+        <section className='loginsignup'>
           <Button
-            disabled={!newUserName}
+            disabled={newUserName.length < 4 || newUserPassword.length < 8}
             handleClick={handleCreateUser}
             buttonText='Create user'
           />
           <Button handleClick={toggleCreateUserModal} buttonText='Cancel' />
-        </div>
+        </section>
       </Modal>
 
       {currentTournament && (

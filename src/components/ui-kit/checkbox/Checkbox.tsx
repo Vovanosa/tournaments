@@ -12,7 +12,7 @@ const Checkbox: FunctionComponent<CheckboxProps> = (props) => {
   const { isChecked, onChange, children, disabled } = props;
 
   return (
-    <>
+    <label className={styles.checkboxLabel}>
       <input
         disabled={disabled}
         type='checkbox'
@@ -21,7 +21,7 @@ const Checkbox: FunctionComponent<CheckboxProps> = (props) => {
         style={styles}
       />
       {children}
-    </>
+    </label>
   );
 };
 
