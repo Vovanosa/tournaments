@@ -67,6 +67,14 @@ app.post('/api/users', (req, res) => {
   res.status(201).json(newUser);
 });
 
+app.put('/api/users/:id', (req, res) => {
+  const { id } = req.params;
+  const updatedUser = req.body;
+  users = users.map((u) => (u.id === parseInt(id) ? updatedUser : u));
+  saveData(USERS_FILE, users);
+  res.json(updatedUser);
+});
+
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });

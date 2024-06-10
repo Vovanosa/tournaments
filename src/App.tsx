@@ -46,6 +46,7 @@ type User = {
   name: string;
   role: string;
   password: string;
+  isLoggedIn: boolean;
 };
 
 const App = () => {
@@ -77,7 +78,16 @@ const App = () => {
 
     axios
       .get('/api/users')
-      .then((response) => setUsers(response.data))
+      .then((response) => {
+        setUsers(response.data);
+        const loggedInUser = response.data.find(
+          (user: User) => user.isLoggedIn
+        );
+        if (loggedInUser) {
+          setCurrentUser(loggedInUser);
+        }
+      })
+
       .catch((error) => console.error('Error fetching users:', error));
   }, []);
 
@@ -190,7 +200,10 @@ const App = () => {
   const handleNumTeamsChange = (value: string) => {
     setNumTeams(parseInt(value));
     setTeamNames(
-      Array.from({ length: parseInt(value) }, (_, index) => `Team ${index + 1}`)
+      Array.from(
+        { length: parseInt(value) },
+        (_, index) => `Команда ${index + 1}`
+      )
     );
   };
 
@@ -215,14 +228,14 @@ const App = () => {
         })
         .catch((error) => console.error('Error creating tournament:', error));
     } else {
-      alert('Tournament with that name already exists');
+      alert('Турнір з такою назвою вже існує');
       setTournamentName('');
     }
   };
 
   const handleDeleteTournament = () => {
     if (currentTournament) {
-      if (window.confirm('Are you sure you want to delete this tournament?')) {
+      if (window.confirm('Ви дійсно хочете видалити цей турнір?')) {
         axios
           .delete(`/api/tournaments/${currentTournament.id}`)
           .then(() => {
@@ -259,8 +272,8 @@ const App = () => {
 
     if (!wasWinner) {
       clickedParticipant.isWinner = true;
-      clickedParticipant.resultText = 'Winner';
-      otherParticipant.resultText = 'Lost';
+      clickedParticipant.resultText = 'Перемога';
+      otherParticipant.resultText = 'Програш';
     }
 
     let nextMatchId = currentMatch.nextMatchId;
@@ -276,7 +289,7 @@ const App = () => {
       }
     }
 
-    if (currentMatch.startTime === 'Date unknown') {
+    if (currentMatch.startTime === 'Дата невідома') {
       currentMatch.startTime = new Date().toISOString().split('T')[0];
     }
 
@@ -422,19 +435,28 @@ const App = () => {
 
   const handleCreateUser = async () => {
     if (users.some((user) => user.name === newUserName)) {
-      alert('User with that nickname already exists');
+      alert('Користувач з таким іменем вже існує');
       setNewUserName('');
       setNewUserPassword('');
     } else {
       try {
         const hashedPassword = await bcrypt.hash(newUserPassword, 10);
 
+        if (currentUser) {
+          const endpoint = `/api/users/${currentUser.id}`;
+          const updatedCurrentUser = { ...currentUser, isLoggedIn: false };
+          setCurrentUser(updatedCurrentUser);
+          await axios.put(endpoint, updatedCurrentUser);
+        }
+
         const newUser = {
           id: Date.now(),
           name: newUserName,
           password: hashedPassword,
           role: 'user',
+          isLoggedIn: true,
         };
+
         const response = await axios.post('/api/users', newUser);
         setUsers([...users, response.data]);
         setCurrentUser(response.data);
@@ -453,17 +475,34 @@ const App = () => {
       if (user) {
         const isMatch = await bcrypt.compare(loginPassword, user.password);
         if (isMatch) {
+          if (currentUser) {
+            const updatedCurrentUser = { ...currentUser, isLoggedIn: false };
+            await axios.put(`/api/users/${currentUser.id}`, updatedCurrentUser);
+          }
+
+          const updatedUser = { ...user, isLoggedIn: true };
+          await axios.put(`/api/users/${user.id}`, updatedUser);
+
           setCurrentUser(user);
           setUserModalIsOpen(false);
           setCurrentTournament(null);
         } else {
-          alert('Invalid username or password');
+          alert("Неправильне ім'я або пароль");
         }
       } else {
-        alert('Invalid username or password');
+        alert("Неправильне ім'я або пароль");
       }
     } catch (error) {
       console.error('Error logging in:', error);
+    }
+  };
+
+  const handleLogout = async () => {
+    if (currentUser) {
+      const updatedCurrentUser = { ...currentUser, isLoggedIn: false };
+      await axios.put(`/api/users/${currentUser.id}`, updatedCurrentUser);
+
+      setCurrentUser(null);
     }
   };
 
@@ -471,19 +510,19 @@ const App = () => {
     <>
       <header>
         <section className='left-content'>
-          <h1>Tournament table </h1>
+          <h1>Ткрнірна таблиця </h1>
           <Button
-            buttonText='Open Tournament'
+            buttonText='Відкрити турнір'
             handleClick={toggleOpenModal}
             disabled={false}
           />
         </section>
 
         <section className='right-content'>
-          {currentUser ? <h2>Welcome, {currentUser.name}</h2> : ''}
+          {currentUser ? <h2>Вітаю, {currentUser.name} !</h2> : ''}
           <Button
             handleClick={toggleUserModal}
-            buttonText={currentUser ? 'Change User' : 'Sign In'}
+            buttonText={currentUser ? 'Змінити користувача' : 'Ввійти'}
           />
         </section>
       </header>
@@ -491,7 +530,7 @@ const App = () => {
       {currentTournament && (
         <>
           <Button
-            buttonText='Update'
+            buttonText='Оновити турнір'
             handleClick={toggleUpdateModal}
             disabled={
               currentUser?.role !== 'admin' &&
@@ -499,7 +538,8 @@ const App = () => {
             }
           />
           <Button
-            buttonText='Delete Tournament'
+            className='red-button'
+            buttonText='Видалити турнір'
             handleClick={handleDeleteTournament}
             disabled={
               currentUser?.role !== 'admin' &&
@@ -514,21 +554,21 @@ const App = () => {
         isOpen={modalIsOpen}
         onRequestClose={toggleModal}
       >
-        <h2>Select Number of Teams</h2>
+        <h2>Кількість команд</h2>
         <InputText
           id='tournamentName'
           name='tournamentName'
           value={tournamentName}
           onChange={(e) => setTournamentName(e.target.value)}
-          inputText={'Tournament name'}
+          inputText={'Назва турніру'}
         />
         <Selector
-          defaultOption='Select Number of Teams'
+          defaultOption='Кількість команд'
           options={['2', '4', '8', '16', '32']}
           setSelectedValue={handleNumTeamsChange}
         />
         <Checkbox isChecked={randomizeTeams} onChange={handleRandomizeChange}>
-          Randomize Teams
+          Перемішати команди
         </Checkbox>
         <Checkbox
           isChecked={isPrivate === 'public'}
@@ -536,24 +576,25 @@ const App = () => {
             setIsPrivate(isPrivate === 'public' ? 'private' : 'public');
           }}
         >
-          Public match
+          Публічний матч
         </Checkbox>
         <br />
         <Button
-          buttonText='Create Tournament'
+          buttonText='Створити турнір'
           handleClick={handleCreateTournament}
           disabled={!Boolean(teamNames.length) || !currentUser}
         />
         <Button
-          buttonText='Cancel'
+          className='red-button'
+          buttonText='Відмінити'
           handleClick={toggleModal}
           disabled={false}
         />
         {teamNames.map((teamName, index) => (
           <section className='create_modal' key={index}>
-            <label htmlFor={`teamName${index}`}>{`Team ${
+            <label htmlFor={`teamName${index}`}>{`Ім'я ${
               index + 1
-            } name:`}</label>
+            } команди: `}</label>
             <InputText
               autoFocus={index === 0}
               id={`teamName${index}`}
@@ -571,14 +612,14 @@ const App = () => {
         isOpen={openModalIsOpen}
         onRequestClose={toggleOpenModal}
       >
-        <h2>Select Tournament</h2>
+        <h2>Вибрати турнір</h2>
         {currentUser && currentUser.role !== 'guest' && (
           <>
-            <h3>My matches</h3>
+            <h3>Мої турніри</h3>
             {tournaments.filter(
               (tournament) => tournament.creator === currentUser.name
             ).length === 0
-              ? 'No matches'
+              ? 'Відсутні'
               : tournaments
                   .filter(
                     (tournament) => tournament.creator === currentUser.name
@@ -587,11 +628,11 @@ const App = () => {
                     <Button
                       disabled={currentTournament?.id === tournament.id}
                       key={tournament.id}
-                      buttonText={`Tournament ${tournament.name}`}
+                      buttonText={`Турнір: ${tournament.name}`}
                       handleClick={() => handleOpenTournament(tournament)}
                     />
                   ))}
-            <h3>All matches</h3>
+            <h3>Всі турніри</h3>
           </>
         )}
 
@@ -606,17 +647,21 @@ const App = () => {
             <Button
               disabled={currentTournament?.id === tournament.id}
               key={tournament.id}
-              buttonText={`Tournament ${tournament.name}`}
+              buttonText={`Турнір: ${tournament.name}`}
               handleClick={() => handleOpenTournament(tournament)}
             />
           ))}
         <section className='loginsignup'>
           <Button
-            buttonText='Create Tournament'
+            buttonText='Створити турнір'
             handleClick={toggleModal}
             disabled={currentUser?.role === 'guest' || !currentUser}
           />
-          <Button buttonText='Cancel' handleClick={toggleOpenModal} />
+          <Button
+            buttonText='Відмінити'
+            handleClick={toggleOpenModal}
+            className='red-button'
+          />
         </section>
       </Modal>
 
@@ -626,9 +671,12 @@ const App = () => {
           isOpen={updateModalIsOpen}
           onRequestClose={toggleUpdateModal}
         >
-          <Button buttonText='Apply Changes' handleClick={handleApplyChanges} />
-          <Button buttonText='Exit' handleClick={toggleUpdateModal} />
-          <h2>Update Matches</h2>
+          <Button
+            buttonText='Прийняти зміни'
+            handleClick={handleApplyChanges}
+          />
+          <Button buttonText='На головну' handleClick={toggleUpdateModal} />
+          <h2>Оновити матч</h2>
           <section className='matches'>
             {currentTournament &&
               Array.from(
@@ -685,20 +733,20 @@ const App = () => {
                                     )
                                   }
                                 >
-                                  Winner
+                                  Переможець
                                 </Checkbox>
                               </section>
                             )
                           )}
                           <label htmlFor={`matchDate${match.id}`}>
-                            Match Date:
+                            Дата матчу:
                           </label>
                           <input
                             type='date'
                             id={`matchDate${match.id}`}
                             name={`matchDate${match.id}`}
                             value={
-                              match.startTime === 'Date unknown'
+                              match.startTime === 'Дата невідома'
                                 ? ''
                                 : match.startTime
                             }
@@ -718,13 +766,13 @@ const App = () => {
         isOpen={userModalIsOpen}
         onRequestClose={toggleUserModal}
       >
-        <h2>Log In</h2>
+        <h2>Ввійти</h2>
         <InputText
           id={'loginUsername'}
           name={'loginUsername'}
           value={loginUsername}
           onChange={(e) => setLoginUsername(e.target.value)}
-          inputText={'Username'}
+          inputText={'Логін'}
         />
         <br />
         <InputText
@@ -732,16 +780,26 @@ const App = () => {
           name={'loginPassword'}
           value={loginPassword}
           onChange={(e) => setLoginPassword(e.target.value)}
-          inputText={'Password'}
+          inputText={'Пароль'}
           password={true}
         />
         <br />
         <section className='loginsignup'>
-          <Button handleClick={handleLogin} buttonText='Log In' />
-          <Button handleClick={toggleCreateUserModal} buttonText='Sign Up' />
+          <Button handleClick={handleLogin} buttonText='Ввійти' />
+          <Button
+            handleClick={toggleCreateUserModal}
+            buttonText='Зареєструватись'
+          />
         </section>
 
-        <Button handleClick={toggleUserModal} buttonText='Cancel' />
+        <Button
+          handleClick={toggleUserModal}
+          buttonText='Відмінити'
+          className='red-button'
+        />
+        {currentUser && (
+          <Button handleClick={handleLogout} buttonText='Вийти' />
+        )}
       </Modal>
 
       <Modal
@@ -749,21 +807,21 @@ const App = () => {
         isOpen={createUserModalIsOpen}
         onRequestClose={toggleCreateUserModal}
       >
-        <h2>Create User</h2>
+        <h2>Реєстрація</h2>
         <label>
           <InputText
             id='newUserName'
             name='NewUserName'
             value={newUserName}
             onChange={(e) => setNewUserName(e.target.value)}
-            inputText={'Username'}
+            inputText={'Логін'}
           />
           <InputText
             id='newUserPasswod'
             name='NewUserPasswod'
             value={newUserPassword}
             onChange={(e) => setNewUserPassword(e.target.value)}
-            inputText={'Password (>8 characters)'}
+            inputText={'Пароль (мін. 8 символів)'}
             password={true}
           />
         </label>
@@ -771,16 +829,20 @@ const App = () => {
           <Button
             disabled={newUserName.length < 4 || newUserPassword.length < 8}
             handleClick={handleCreateUser}
-            buttonText='Create user'
+            buttonText='Зареєструватись'
           />
-          <Button handleClick={toggleCreateUserModal} buttonText='Cancel' />
+          <Button
+            handleClick={toggleCreateUserModal}
+            buttonText='Відмінити'
+            className='red-button'
+          />
         </section>
       </Modal>
 
       {currentTournament && (
         <>
           <br />
-          Current tournament: {currentTournament.name}
+          Ім'я турніру: {currentTournament.name}
           <SingleEliminationBracket
             matches={currentTournament.matches}
             matchComponent={Match}

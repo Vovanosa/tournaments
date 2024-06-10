@@ -85,7 +85,7 @@ input[type='text'] {
   &.signin {
     align-self: center;
     height: 18em;
-    width: 23em;
+    width: 29em;
   }
 }
 
@@ -107,4 +107,8 @@ input[type='text'] {
     margin-bottom: 2em;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
+}
+
+.red-button:hover {
+  background-color: #e57070;
 }
