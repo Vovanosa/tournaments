@@ -273,7 +273,7 @@ const App = () => {
 
     if (!wasWinner) {
       clickedParticipant.isWinner = true;
-      clickedParticipant.resultText = 'Виграв';
+      clickedParticipant.resultText = 'Переміг';
       otherParticipant.resultText = 'Програв';
     }
 
@@ -440,7 +440,7 @@ const App = () => {
         setNewUserPassword('');
         toggleCreateUserModal();
         setCurrentTournament(null);
-        setTriggerFetch(prev => !prev);
+        setTriggerFetch((prev) => !prev);
       } catch (error) {
         console.error('Error creating user:', error);
       }
@@ -464,7 +464,7 @@ const App = () => {
           setCurrentUser(user);
           setUserModalIsOpen(false);
           setCurrentTournament(null);
-          setTriggerFetch(prev => !prev);
+          setTriggerFetch((prev) => !prev);
         } else {
           alert("Неправильне ім'я або пароль");
         }
@@ -482,8 +482,8 @@ const App = () => {
       await axios.put(`/api/users/${currentUser.id}`, updatedCurrentUser);
 
       setCurrentUser(null);
-      setCurrentTournament(null);  
-      setTriggerFetch(prev => !prev);
+      setCurrentTournament(null);
+      setTriggerFetch((prev) => !prev);
     }
   };
 
@@ -690,7 +690,7 @@ const App = () => {
                           {match.participants.map(
                             (participant, participantIndex) => (
                               <section key={participant.id}>
-                                {participant.name+' '}
+                                {participant.name + ' '}
                                 <Checkbox
                                   isChecked={participant.isWinner}
                                   onChange={() =>
