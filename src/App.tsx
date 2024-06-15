@@ -228,14 +228,14 @@ const App = () => {
         })
         .catch((error) => console.error('Error creating tournament:', error));
     } else {
-      alert('Турнір з такою назвою вже існує');
+      alert('Змагання з такою назвою вже існує');
       setTournamentName('');
     }
   };
 
   const handleDeleteTournament = () => {
     if (currentTournament) {
-      if (window.confirm('Ви дійсно хочете видалити цей турнір?')) {
+      if (window.confirm('Ви дійсно хочете видалити цей змагання?')) {
         axios
           .delete(`/api/tournaments/${currentTournament.id}`)
           .then(() => {
@@ -510,9 +510,9 @@ const App = () => {
     <>
       <header>
         <section className='left-content'>
-          <h1>Ткрнірна таблиця </h1>
+          <h1>Таблиця змагань </h1>
           <Button
-            buttonText='Відкрити турнір'
+            buttonText='Відкрити таблицю'
             handleClick={toggleOpenModal}
             disabled={false}
           />
@@ -530,7 +530,7 @@ const App = () => {
       {currentTournament && (
         <>
           <Button
-            buttonText='Оновити турнір'
+            buttonText='Оновити змагання'
             handleClick={toggleUpdateModal}
             disabled={
               currentUser?.role !== 'admin' &&
@@ -539,7 +539,7 @@ const App = () => {
           />
           <Button
             className='red-button'
-            buttonText='Видалити турнір'
+            buttonText='Видалити змагання'
             handleClick={handleDeleteTournament}
             disabled={
               currentUser?.role !== 'admin' &&
@@ -560,7 +560,7 @@ const App = () => {
           name='tournamentName'
           value={tournamentName}
           onChange={(e) => setTournamentName(e.target.value)}
-          inputText={'Назва турніру'}
+          inputText={'Назва змагання'}
         />
         <Selector
           defaultOption='Кількість команд'
@@ -580,9 +580,11 @@ const App = () => {
         </Checkbox>
         <br />
         <Button
-          buttonText='Створити турнір'
+          buttonText='Створити змагання'
           handleClick={handleCreateTournament}
-          disabled={!Boolean(teamNames.length) || !currentUser}
+          disabled={
+            !Boolean(teamNames.length) || tournamentName.trim().length < 1
+          }
         />
         <Button
           className='red-button'
@@ -612,10 +614,10 @@ const App = () => {
         isOpen={openModalIsOpen}
         onRequestClose={toggleOpenModal}
       >
-        <h2>Вибрати турнір</h2>
+        <h2>Вибрати змагання</h2>
         {currentUser && currentUser.role !== 'guest' && (
           <>
-            <h3>Мої турніри</h3>
+            <h3>Мої змагання</h3>
             {tournaments.filter(
               (tournament) => tournament.creator === currentUser.name
             ).length === 0
@@ -628,11 +630,11 @@ const App = () => {
                     <Button
                       disabled={currentTournament?.id === tournament.id}
                       key={tournament.id}
-                      buttonText={`Турнір: ${tournament.name}`}
+                      buttonText={` ${tournament.name} `}
                       handleClick={() => handleOpenTournament(tournament)}
                     />
                   ))}
-            <h3>Всі турніри</h3>
+            <h3>Всі змагання</h3>
           </>
         )}
 
@@ -647,13 +649,13 @@ const App = () => {
             <Button
               disabled={currentTournament?.id === tournament.id}
               key={tournament.id}
-              buttonText={`Турнір: ${tournament.name}`}
+              buttonText={` ${tournament.name} `}
               handleClick={() => handleOpenTournament(tournament)}
             />
           ))}
         <section className='loginsignup'>
           <Button
-            buttonText='Створити турнір'
+            buttonText='Створити змагання'
             handleClick={toggleModal}
             disabled={currentUser?.role === 'guest' || !currentUser}
           />
@@ -842,7 +844,7 @@ const App = () => {
       {currentTournament && (
         <>
           <br />
-          Ім'я турніру: {currentTournament.name}
+          Назва змагання: {currentTournament.name}
           <SingleEliminationBracket
             matches={currentTournament.matches}
             matchComponent={Match}
