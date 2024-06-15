@@ -15,36 +15,7 @@
     "id": 1717791544651,
     "name": "admin",
     "password": "$2a$10$nXrDm0g5i/Y3KSDVdxqcxuVPRC60AFdJjoaeaYgbqQrRVBZcfdeUq",
-    "role": "admin"
-  },
-  {
-    "id": 1717868821012,
-    "name": "user123",
-    "password": "$2a$10$ulqyixxVyfRzV60rXs.tU.Ir9MM.ZqtXAAAESWVjMedtEIGjj2JKe",
-    "role": "user"
-  },
-  {
-    "id": 1717868868794,
-    "name": "user3",
-    "password": "$2a$10$FrwQOUSoyq1sdm5sbNeYdeQgRsvnHoQ7MsOAmw0n7E9A1tHUUw6py",
-    "role": "user"
-  },
-  {
-    "id": 1717868926548,
-    "name": "",
-    "password": "$2a$10$VfRVR8hzC6X71.z09/cks.NY/DYSLgUZRQld1VZMOWdGIX52lv.M2",
-    "role": "user"
-  },
-  {
-    "id": 1717868981572,
-    "name": "1234",
-    "password": "$2a$10$EzUCXT4zmVNzoK44HVetj..Cv/YxWO5ujmVJe.GLUzZKie0Y9iirG",
-    "role": "user"
-  },
-  {
-    "id": 1717869794915,
-    "name": "vii.marina",
-    "password": "$2a$10$VUL2V0aE58fwQxiRTnOTEuhcivy8QtgmfYbvcXElZpl4tFboJIM8O",
-    "role": "user"
+    "role": "admin",
+    "isLoggedIn": true
   }
 ]
