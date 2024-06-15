@@ -70,6 +70,7 @@ const App = () => {
   const [loginUsername, setLoginUsername] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [isPrivate, setIsPrivate] = useState('private');
+  const [triggerFetch, setTriggerFetch] = useState(false);
   useEffect(() => {
     axios
       .get('/api/tournaments')
@@ -89,7 +90,7 @@ const App = () => {
       })
 
       .catch((error) => console.error('Error fetching users:', error));
-  }, []);
+  }, [[triggerFetch]]);
 
   const toggleUpdateModal = () => {
     setUpdateModalIsOpen(!updateModalIsOpen);
@@ -272,8 +273,8 @@ const App = () => {
 
     if (!wasWinner) {
       clickedParticipant.isWinner = true;
-      clickedParticipant.resultText = 'Перемога';
-      otherParticipant.resultText = 'Програш';
+      clickedParticipant.resultText = 'Виграв';
+      otherParticipant.resultText = 'Програв';
     }
 
     let nextMatchId = currentMatch.nextMatchId;
@@ -388,31 +389,6 @@ const App = () => {
     return p1.id !== p2.id;
   };
 
-  const handleParticipantNameChange = (
-    roundIndex: number,
-    matchIndex: number,
-    participantIndex: number,
-    newValue: string
-  ) => {
-    if (!currentTournament) return;
-    const newMatches = [...currentTournament.matches];
-    const filteredMatch = newMatches.filter(
-      (m) => parseInt(m.tournamentRoundText) === roundIndex + 1
-    )[matchIndex];
-    filteredMatch.participants[participantIndex].name = newValue;
-    const updatedTournament = { ...currentTournament, matches: newMatches };
-    setCurrentTournament(updatedTournament);
-    setTournaments(
-      tournaments.map((t) =>
-        t.id === currentTournament.id ? updatedTournament : t
-      )
-    );
-
-    axios
-      .put(`/api/tournaments/${currentTournament.id}`, updatedTournament)
-      .catch((error) => console.error('Error updating tournament:', error));
-  };
-
   const handleOpenTournament = (tournament: Tournament) => {
     let filteredTournaments: Tournament[] = [];
 
@@ -463,6 +439,8 @@ const App = () => {
         setNewUserName('');
         setNewUserPassword('');
         toggleCreateUserModal();
+        setCurrentTournament(null);
+        setTriggerFetch(prev => !prev);
       } catch (error) {
         console.error('Error creating user:', error);
       }
@@ -486,6 +464,7 @@ const App = () => {
           setCurrentUser(user);
           setUserModalIsOpen(false);
           setCurrentTournament(null);
+          setTriggerFetch(prev => !prev);
         } else {
           alert("Неправильне ім'я або пароль");
         }
@@ -503,6 +482,8 @@ const App = () => {
       await axios.put(`/api/users/${currentUser.id}`, updatedCurrentUser);
 
       setCurrentUser(null);
+      setCurrentTournament(null);  
+      setTriggerFetch(prev => !prev);
     }
   };
 
@@ -709,22 +690,7 @@ const App = () => {
                           {match.participants.map(
                             (participant, participantIndex) => (
                               <section key={participant.id}>
-                                <InputText
-                                  autoFocus={false}
-                                  id={`participantName${participant.id}`}
-                                  name={`participantName${participant.id}`}
-                                  value={participant.name || 'No participant'}
-                                  onChange={(e) =>
-                                    handleParticipantNameChange(
-                                      roundIndex - 1,
-                                      matchIndex,
-                                      participantIndex,
-                                      e.target.value
-                                    )
-                                  }
-                                  disabled
-                                  inputText={''}
-                                />
+                                {participant.name+' '}
                                 <Checkbox
                                   isChecked={participant.isWinner}
                                   onChange={() =>
